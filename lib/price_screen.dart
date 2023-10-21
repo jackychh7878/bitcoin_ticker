@@ -31,7 +31,6 @@ class _PriceScreenState extends State<PriceScreen> {
         setState(() {
           selectedCurrency = value!;
           getDataList();
-          // setCryptoCardFullDataList();
         });
       },
     );
@@ -63,23 +62,6 @@ class _PriceScreenState extends State<PriceScreen> {
     return Container();
   }
 
-  //TODO 7: Figure out a way of displaying a '?' on screen while we're waiting for the price data to come back. Hint: You'll need a ternary operator.
-
-  //TODO 6: Update this method to receive a Map containing the crypto:price key value pairs. Then use that map to update the CryptoCards.
-
-  // void getData() async {
-  //   exchangeRateData = await CoinData().getCoinData(cryptoCurrency, selectedCurrency);
-  // }
-
-  // void getDataFullList() async {
-  //   setCryptoCardFullDataList();
-  //   var fetchingExchangeRateDataList = await CoinData().getCoinFullListData(cryptoList, currenciesList);
-  //   print(fetchingExchangeRateDataList);
-  //   setState(() {
-  //     exchangeRateDataList = fetchingExchangeRateDataList;
-  //   });
-  // }
-
   bool isWaiting = false;
   var exchangeRateDataList; //This is a hashmap between crypto and exchange rate
 
@@ -99,7 +81,6 @@ class _PriceScreenState extends State<PriceScreen> {
 
   Column makeCards() {
     List<CryptoCard> cryptoCardList = [];
-
     for(String crypto in cryptoList) {
       cryptoCardList.add(CryptoCard(
           exchangeRateData: isWaiting ? '?' : exchangeRateDataList[crypto].toString(),
@@ -112,23 +93,6 @@ class _PriceScreenState extends State<PriceScreen> {
       children: cryptoCardList,
     );
   }
-
-  //This cryptoCard list is for full data
-  // void setCryptoCardFullDataList() {
-  //   if (exchangeRateDataList != null) {
-  //     for(String crypto in cryptoList) {
-  //       cryptoCardList.add(CryptoCard(exchangeRateData: exchangeRateDataList[crypto][selectedCurrency], selectedCrypto: crypto, selectedCurrency: selectedCurrency));
-  //     }
-  //   } else {
-  //     for(String crypto in cryptoList) {
-  //       cryptoCardList.add(CryptoCard(exchangeRateData: -1, selectedCrypto: crypto, selectedCurrency: selectedCurrency));
-  //     }
-  //   }
-  // }
-
-  //This cryptoCard List is for specific currency
-
-
 
   @override
   void initState() {
@@ -150,19 +114,6 @@ class _PriceScreenState extends State<PriceScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          //TODO 1: Refactor this Padding Widget into a separate Stateless Widget called CryptoCard, so we can create 3 of them, one for each cryptocurrency.
-          //TODO 2: You'll need to able to pass the selectedCurrency, value and cryptoCurrency to the constructor of this CryptoCard Widget.
-          //TODO 3: You'll need to use a Column Widget to contain the three CryptoCards.
-/*          exchangeRateDataList == null ?
-              Center(
-                child: SpinKitDoubleBounce(
-                  color: Colors.black,
-                  size: 100,
-                ),
-              )
-              : Column(
-            children: cryptoCardList,
-          ),*/
           makeCards(),
           Container(
             height: 150.0,
