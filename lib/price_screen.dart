@@ -11,12 +11,9 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
 
-  String selectedCurrency = 'USD';
+  String selectedCurrency = 'AUD';
   String cryptoCurrency = 'BTC';
   double exchangeRateData = -1;
-  var exchangeRateDataList;
-  List<CryptoCard> cryptoCardList = [];
-
 
   DropdownButton<String> androidDropdown () {
     List<DropdownMenuItem<String>> dropdownItemsList = [];
@@ -33,8 +30,8 @@ class _PriceScreenState extends State<PriceScreen> {
       onChanged: (value) {
         setState(() {
           selectedCurrency = value!;
-          cryptoCardList = [];
-          setCryptoCardList();
+          getDataList();
+          // setCryptoCardFullDataList();
         });
       },
     );
@@ -50,8 +47,7 @@ class _PriceScreenState extends State<PriceScreen> {
       onSelectedItemChanged: (selectedIndex) {
         setState(() {
           selectedCurrency = currenciesList[selectedIndex];
-          cryptoCardList = [];
-          setCryptoCardList();
+          getDataList();
         });
       },
       children: pickerItemsList,
@@ -71,36 +67,74 @@ class _PriceScreenState extends State<PriceScreen> {
 
   //TODO 6: Update this method to receive a Map containing the crypto:price key value pairs. Then use that map to update the CryptoCards.
 
-  void getData() async {
-    exchangeRateData = await CoinData().getCoinData(cryptoCurrency, selectedCurrency);
-  }
+  // void getData() async {
+  //   exchangeRateData = await CoinData().getCoinData(cryptoCurrency, selectedCurrency);
+  // }
+
+  // void getDataFullList() async {
+  //   setCryptoCardFullDataList();
+  //   var fetchingExchangeRateDataList = await CoinData().getCoinFullListData(cryptoList, currenciesList);
+  //   print(fetchingExchangeRateDataList);
+  //   setState(() {
+  //     exchangeRateDataList = fetchingExchangeRateDataList;
+  //   });
+  // }
+
+  bool isWaiting = false;
+  var exchangeRateDataList; //This is a hashmap between crypto and exchange rate
 
   void getDataList() async {
-    setCryptoCardList();
-    var fetchingExchangeRateDataList = await CoinData().getCoinListData(cryptoList, currenciesList);
-    print(fetchingExchangeRateDataList);
-    setState(() {
-      exchangeRateDataList = fetchingExchangeRateDataList;
-    });
+    isWaiting = true;
+    try {
+      var fetchingExchangeRateDataList = await CoinData().getConListData(cryptoList, selectedCurrency);
+      isWaiting = false;
+      setState(() {
+        exchangeRateDataList = fetchingExchangeRateDataList;
+      });
+    } catch (e) {
+      print(e);
+    }
+
   }
 
-  void setCryptoCardList() {
-    if (exchangeRateDataList != null) {
-      for(String crypto in cryptoList) {
-        cryptoCardList.add(CryptoCard(exchangeRateData: exchangeRateDataList[crypto][selectedCurrency], selectedCrypto: crypto, selectedCurrency: selectedCurrency));
-      }
-    } else {
-      for(String crypto in cryptoList) {
-        cryptoCardList.add(CryptoCard(exchangeRateData: -1, selectedCrypto: crypto, selectedCurrency: selectedCurrency));
-      }
+  Column makeCards() {
+    List<CryptoCard> cryptoCardList = [];
+
+    for(String crypto in cryptoList) {
+      cryptoCardList.add(CryptoCard(
+          exchangeRateData: isWaiting ? '?' : exchangeRateDataList[crypto].toString(),
+          selectedCrypto: crypto,
+          selectedCurrency: selectedCurrency));
     }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: cryptoCardList,
+    );
   }
+
+  //This cryptoCard list is for full data
+  // void setCryptoCardFullDataList() {
+  //   if (exchangeRateDataList != null) {
+  //     for(String crypto in cryptoList) {
+  //       cryptoCardList.add(CryptoCard(exchangeRateData: exchangeRateDataList[crypto][selectedCurrency], selectedCrypto: crypto, selectedCurrency: selectedCurrency));
+  //     }
+  //   } else {
+  //     for(String crypto in cryptoList) {
+  //       cryptoCardList.add(CryptoCard(exchangeRateData: -1, selectedCrypto: crypto, selectedCurrency: selectedCurrency));
+  //     }
+  //   }
+  // }
+
+  //This cryptoCard List is for specific currency
+
 
 
   @override
   void initState() {
     super.initState();
-    getData();
+    // getData();
+    // getDataFullList();
     getDataList();
   }
   //TODO: For bonus points, create a method that loops through the cryptoList and generates a CryptoCard for each.
@@ -119,7 +153,7 @@ class _PriceScreenState extends State<PriceScreen> {
           //TODO 1: Refactor this Padding Widget into a separate Stateless Widget called CryptoCard, so we can create 3 of them, one for each cryptocurrency.
           //TODO 2: You'll need to able to pass the selectedCurrency, value and cryptoCurrency to the constructor of this CryptoCard Widget.
           //TODO 3: You'll need to use a Column Widget to contain the three CryptoCards.
-          exchangeRateDataList == null ?
+/*          exchangeRateDataList == null ?
               Center(
                 child: SpinKitDoubleBounce(
                   color: Colors.black,
@@ -128,7 +162,8 @@ class _PriceScreenState extends State<PriceScreen> {
               )
               : Column(
             children: cryptoCardList,
-          ),
+          ),*/
+          makeCards(),
           Container(
             height: 150.0,
             alignment: Alignment.center,
@@ -150,7 +185,7 @@ class CryptoCard extends StatelessWidget {
     required this.selectedCurrency,
   });
 
-  final double exchangeRateData;
+  final String exchangeRateData;
   final String selectedCrypto;
   final String selectedCurrency;
 
@@ -167,7 +202,7 @@ class CryptoCard extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
           child: Text(
-            exchangeRateData != -1 ? '1 $selectedCrypto = $exchangeRateData $selectedCurrency' : '1 $selectedCrypto = ? $selectedCurrency',
+            '$selectedCrypto = $exchangeRateData $selectedCurrency',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 20.0,

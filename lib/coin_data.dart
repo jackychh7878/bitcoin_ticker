@@ -59,6 +59,7 @@ class NetworkHelper{
 class CoinData {
   //TODO 4: Use a for loop here to loop through the cryptoList and request the data for each of them in turn.
   //TODO 5: Return a Map of the results instead of a single value.
+
   Future<dynamic> getCoinData(String crypto, String currency) async {
     var url = '$newCoinAPIURL/$crypto/$currency';
     NetworkHelper networkHelper = NetworkHelper(url: url);
@@ -67,7 +68,8 @@ class CoinData {
     return exchangeRate;
   }
 
-  Future<HashMap<String, HashMap<String, double>>> getCoinListData(List<String> cryptoList, List<String> currenciesList) async {
+  //This api call the full list of the crypto rate
+  Future<HashMap<String, HashMap<String, double>>> getCoinFullListData(List<String> cryptoList, List<String> currenciesList) async {
     HashMap<String, HashMap<String, double>> cryptoCurrencyMap = HashMap();
     for(String crypto in cryptoList) {
       HashMap<String, double> exchangeRateMap = HashMap();
@@ -81,4 +83,17 @@ class CoinData {
     }
     return cryptoCurrencyMap;
   }
+
+  Future<HashMap<String, double>> getConListData(List<String> cryptoList, String currency) async {
+    HashMap<String, double> cryptoCurrencyMap = HashMap();
+    for(String crypto in cryptoList) {
+      var url = '$newCoinAPIURL/$crypto/$currency';
+      NetworkHelper networkHelper = NetworkHelper(url: url);
+      double exchangeRate = await networkHelper.getData();
+      cryptoCurrencyMap.addAll({crypto: exchangeRate});
+    }
+    return cryptoCurrencyMap;
+  }
+
+
 }
